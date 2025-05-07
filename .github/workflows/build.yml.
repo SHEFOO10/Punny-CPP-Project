@@ -1,0 +1,35 @@
+name: Build LibraryGUI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Install .NET Framework 4.8.1
+      run: |
+        choco install netfx-4.8.1-devpack -y
+      shell: pwsh
+
+    - name: Restore NuGet packages
+      run: nuget restore LibraryGUI.vcxproj
+
+    - name: Build the project
+      run: msbuild LibraryGUI.vcxproj /p:Configuration=Release /p:Platform=x64
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: LibraryGUI-Executable
+        path: bin/Release/x64/LibraryGUI.exe
